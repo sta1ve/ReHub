@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>THE-RE-PROTOCOL-TIMES</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="shortcut icon" href="favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0b0e;
+      --text: #f5f5f7;
+      --muted: #9a9aa3;
+      --accent: #f5f5f7;
+      --border: rgba(245, 245, 247, 0.3);
+      --scrollbar-bg: #0f0f12;
+      --scrollbar-thumb: #2a2a2e;
+      --scrollbar-thumb-hover: #3f3f45;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Custom Scrollbar Styles */
+    ::-webkit-scrollbar {
+      width: 12px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--scrollbar-bg);
+      border-left: 1px solid rgba(245, 245, 247, 0.1);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--scrollbar-thumb);
+      border-radius: 6px;
+      border: 2px solid var(--scrollbar-bg);
+      transition: background 0.3s ease;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--scrollbar-thumb-hover);
+    }
+
+    /* Firefox Scrollbar */
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-bg);
+    }
+
+    body {
+      margin: 0;
+      background: #000011;
+      color: var(--text);
+      font-family: 'Roboto Mono', monospace;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+
+    .background-slider {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+
+    .background-slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      opacity: 0;
+      transition: opacity 2s ease-in-out;
+    }
+
+    .background-slide.active {
+      opacity: 1;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 17, 0.5);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Language Selector - Enhanced Design */
+    .lang-selector {
+      position: fixed;
+      top: 30px;
+      right: 40px;
+      z-index: 1000;
+    }
+
+    .lang-toggle {
+      background: linear-gradient(135deg, rgba(11, 11, 14, 0.9), rgba(20, 20, 25, 0.9));
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 2px solid transparent;
+      background-clip: padding-box;
+      position: relative;
+      color: var(--text);
+      cursor: pointer;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 18px;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4),
+                  0 0 0 1px rgba(245, 245, 247, 0.15);
+    }
+
+    .lang-toggle::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 8px;
+      padding: 2px;
+      background: linear-gradient(135deg, rgba(245, 245, 247, 0.3), rgba(245, 245, 247, 0.1));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .lang-toggle:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 30px rgba(245, 245, 247, 0.2),
+                  0 0 0 1px rgba(245, 245, 247, 0.3);
+    }
+
+    .lang-toggle:hover::before {
+      opacity: 1;
+    }
+
+    .lang-icon {
+      font-size: 22px;
+      color: var(--text);
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+      transition: transform 0.4s ease;
+    }
+
+    .lang-toggle:hover .lang-icon {
+      transform: rotate(15deg) scale(1.1);
+    }
+
+    .lang-dropdown {
+      position: absolute;
+      top: calc(100% + 12px);
+      right: 0;
+      background: linear-gradient(135deg, rgba(11, 11, 14, 0.98), rgba(20, 20, 25, 0.98));
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
+      border: 1px solid rgba(245, 245, 247, 0.15);
+      border-radius: 12px;
+      min-width: 200px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-15px) scale(0.95);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 1001;
+      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6),
+                  0 0 0 1px rgba(245, 245, 247, 0.08);
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .lang-dropdown::before {
+      content: '';
+      position: absolute;
+      top: -8px;
+      right: 20px;
+      width: 16px;
+      height: 16px;
+      background: linear-gradient(135deg, rgba(11, 11, 14, 0.98), rgba(20, 20, 25, 0.98));
+      transform: rotate(45deg);
+      border-left: 1px solid rgba(245, 245, 247, 0.15);
+      border-top: 1px solid rgba(245, 245, 247, 0.15);
+    }
+
+    .lang-dropdown.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+
+    .lang-option {
+      display: block;
+      padding: 14px 20px;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      border-bottom: 1px solid rgba(245, 245, 247, 0.08);
+      cursor: pointer;
+      position: relative;
+      z-index: 1;
+    }
+
+    .lang-option:last-child {
+      border-bottom: none;
+    }
+
+    .lang-option::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 3px;
+      height: 100%;
+      background: linear-gradient(180deg, var(--accent), rgba(245, 245, 247, 0.5));
+      transform: scaleY(0);
+      transition: transform 0.3s ease;
+    }
+
+    .lang-option:hover {
+      background: rgba(245, 245, 247, 0.1);
+      padding-left: 28px;
+      color: var(--accent);
+    }
+
+    .lang-option:hover::before {
+      transform: scaleY(1);
+    }
+
+    .landing-container {
+      overflow-y: auto;
+      max-height: 100vh;
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 40px 20px;
+      max-width: 900px;
+      width: 100%;
+      opacity: 0;
+      transform: translateY(30px);
+      animation: fadeInUp 1s ease forwards;
+    }
+
+    /* Custom scrollbar for landing container */
+    .landing-container::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .landing-container::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .landing-container::-webkit-scrollbar-thumb {
+      background: var(--scrollbar-thumb);
+      border-radius: 4px;
+    }
+
+    .landing-container::-webkit-scrollbar-thumb:hover {
+      background: var(--scrollbar-thumb-hover);
+    }
+
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .logo-container {
+      margin-bottom: 60px;
+      animation: pulse 3s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 20px rgba(245, 245, 247, 0.3));
+      }
+      50% {
+        transform: scale(1.05);
+        filter: drop-shadow(0 0 40px rgba(245, 245, 247, 0.6));
+      }
+    }
+
+    .logo-container img {
+      max-width: 500px;
+      width: 100%;
+      height: auto;
+    }
+
+    .description {
+      background: linear-gradient(135deg, rgba(11, 11, 14, 0.8), rgba(20, 20, 25, 0.8));
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
+      border: 1px solid rgba(245, 245, 247, 0.15);
+      border-radius: 16px;
+      padding: 40px;
+      margin-bottom: 50px;
+      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5),
+                  0 0 0 1px rgba(245, 245, 247, 0.08);
+    }
+
+    .description h2 {
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 25px;
+      color: var(--accent);
+      text-shadow: 0 0 20px rgba(245, 245, 247, 0.5);
+      letter-spacing: 1px;
+    }
+
+    .description ul {
+      list-style: none;
+      padding: 0;
+      text-align: left;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .description li {
+      font-size: 17px;
+      line-height: 2;
+      color: var(--text);
+      padding-left: 30px;
+      position: relative;
+      margin-bottom: 15px;
+      transition: all 0.3s ease;
+    }
+
+    .description li:hover {
+      padding-left: 35px;
+      color: var(--accent);
+    }
+
+    .description li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-weight: bold;
+      font-size: 20px;
+      transition: transform 0.3s ease;
+    }
+
+    .description li:hover::before {
+      transform: translateX(5px);
+    }
+
+    .cta-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 15px;
+      background: linear-gradient(135deg, var(--accent), rgba(245, 245, 247, 0.9));
+      color: #000000;
+      text-decoration: none;
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 20px 40px;
+      border: 2px solid var(--accent);
+      border-radius: 12px;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      box-shadow: 0 6px 30px rgba(245, 245, 247, 0.4),
+                  0 0 0 1px rgba(245, 245, 247, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-button::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.1);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .cta-button:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    .cta-button:hover {
+      transform: translateY(-5px) scale(1.05);
+      box-shadow: 0 12px 40px rgba(245, 245, 247, 0.6),
+                  0 0 0 1px rgba(245, 245, 247, 0.3);
+    }
+
+    .cta-button span {
+      position: relative;
+      z-index: 1;
+    }
+
+    .arrow {
+      font-size: 24px;
+      transition: transform 0.4s;
+      position: relative;
+      z-index: 1;
+    }
+
+    .cta-button:hover .arrow {
+      transform: translateX(10px);
+    }
+
+    .page-transition {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000011;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+    }
+
+    .page-transition.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .transition-logo {
+      max-width: 300px;
+      animation: logoFloat 1s ease-in-out infinite;
+    }
+
+    @keyframes logoFloat {
+      0%, 100% {
+        transform: translateY(0) scale(1);
+      }
+      50% {
+        transform: translateY(-20px) scale(1.1);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .lang-selector {
+        top: 20px;
+        right: 20px;
+      }
+
+      .logo-container img {
+        max-width: 300px;
+      }
+
+      .description {
+        padding: 30px 20px;
+      }
+
+      .description h2 {
+        font-size: 22px;
+      }
+
+      .description li {
+        font-size: 15px;
+      }
+
+      .cta-button {
+        font-size: 16px;
+        padding: 15px 30px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="background-slider">
+    <div class="background-slide active" style="background-image: url('https://i.postimg.cc/CK6bqHWn/From-Klick-Pin-CF-Ghim-cua-Claire-Ostre-tren-mapping-Hieu-ung-hinh-anh-Viet-code-Anh-gif-Nguyenvanto.gif');"></div>
+    <div class="background-slide" style="background-image: url('https://i.postimg.cc/CK6bqHWn/From-Klick-Pin-CF-Ghim-cua-Claire-Ostre-tren-mapping-Hieu-ung-hinh-anh-Viet-code-Anh-gif-Nguyenvanto.gif');"></div>
+    <div class="background-slide" style="background-image: url('https://i.postimg.cc/CK6bqHWn/From-Klick-Pin-CF-Ghim-cua-Claire-Ostre-tren-mapping-Hieu-ung-hinh-anh-Viet-code-Anh-gif-Nguyenvanto.gif');"></div>
+  </div>
+
+  <!-- Language Selector -->
+  <div class="lang-selector">
+    <button class="lang-toggle" id="langToggle" type="button" aria-label="Select language">
+      <span class="lang-icon">🌐</span>
+    </button>
+    <div class="lang-dropdown" id="langDropdown">
+      <a href="#" data-lang="en" class="lang-option">English</a>
+      <a href="#" data-lang="ru" class="lang-option">Русский</a>
+      <a href="#" data-lang="uk" class="lang-option">Українська</a>
+      <a href="#" data-lang="vi" class="lang-option">Tiếng Việt</a>
+      <a href="#" data-lang="id" class="lang-option">Bahasa Indonesia</a>
+    </div>
+  </div>
+
+  <div class="landing-container">
+    <div class="logo-container">
+      <img src="https://i.postimg.cc/MZczt3w8/re2.png" alt="THE-RE-PROTOCOL-TIMES">
+    </div>
+
+    <div class="description">
+      <h2 id="welcomeTitle">Welcome to RE Protocol Times</h2>
+      <ul id="featuresList">
+        <li>Latest news and protocol updates</li>
+        <li>Analytical reviews and metrics</li>
+        <li>Team activity on social media</li>
+        <li>Best works from the community</li>
+        <li>Archive of all issues</li>
+      </ul>
+    </div>
+
+    <a href="#" class="cta-button" id="readButton">
+      <span id="ctaText">Read today's newspaper</span>
+      <span class="arrow">→</span>
+    </a>
+  </div>
+
+  <div class="page-transition" id="pageTransition">
+    <img src="https://i.postimg.cc/MZczt3w8/re2.png" alt="Loading" class="transition-logo">
+  </div>
+
+  <script>
+    // Переводы для начальной страницы
+    const translations = {
+      en: {
+        welcomeTitle: "Welcome to RE Times",
+        features: [
+          "Latest news and protocol updates",
+          "Analytical reviews and metrics",
+          "Team activity on social media",
+          "Best works from the community",
+          "Archive of all issues"
+        ],
+        ctaText: "Read today's newspaper"
+      },
+      ru: {
+        welcomeTitle: "Добро пожаловать в RE Times",
+        features: [
+          "Актуальные новости и обновления протокола",
+          "Аналитические обзоры и метрики",
+          "Активность команды в социальных сетях",
+          "Лучшие работы от сообщества",
+          "Архив всех выпусков"
+        ],
+        ctaText: "Читать сегодняшнюю газету"
+      },
+      uk: {
+        welcomeTitle: "Ласкаво просимо до RE Times",
+        features: [
+          "Актуальні новини та оновлення протоколу",
+          "Аналітичні огляди та метрики",
+          "Активність команди в соціальних мережах",
+          "Найкращі роботи від спільноти",
+          "Архів усіх випусків"
+        ],
+        ctaText: "Читати сьогоднішню газету"
+      },
+      vi: {
+        welcomeTitle: "Chào mừng đến với RE Times",
+        features: [
+          "Tin tức và cập nhật giao thức mới nhất",
+          "Tổng quan phân tích và chỉ số",
+          "Hoạt động của đội ngũ trên mạng xã hội",
+          "Tác phẩm hay nhất từ cộng đồng",
+          "Lưu trữ tất cả các số phát hành"
+        ],
+        ctaText: "Đọc báo hôm nay"
+      },
+      id: {
+        welcomeTitle: "Selamat datang di RE Times",
+        features: [
+          "Berita dan pembaruan protokol terbaru",
+          "Tinjauan analitis dan metrik",
+          "Aktivitas tim di media sosial",
+          "Karya terbaik dari komunitas",
+          "Arsip semua edisi"
+        ],
+        ctaText: "Baca koran hari ini"
+      }
+    };
+
+    let currentLanguage = localStorage.getItem('selectedLanguage') || 'en';
+
+    function setLanguage(lang) {
+      currentLanguage = lang;
+      localStorage.setItem('selectedLanguage', lang);
+      const t = translations[lang];
+      
+      document.getElementById('welcomeTitle').textContent = t.welcomeTitle;
+      document.getElementById('ctaText').textContent = t.ctaText;
+      
+      const featuresList = document.getElementById('featuresList');
+      featuresList.innerHTML = '';
+      t.features.forEach(feature => {
+        const li = document.createElement('li');
+        li.textContent = feature;
+        featuresList.appendChild(li);
+      });
+    }
+
+  
+    const slides = document.querySelectorAll('.background-slide');
+    let currentBg = 0;
+    
+    function changeBackground() {
+      slides[currentBg].classList.remove('active');
+      currentBg = (currentBg + 1) % slides.length;
+      slides[currentBg].classList.add('active');
+    }
+    
+    setInterval(changeBackground, 5000);
+    
+    
+    const langToggle = document.getElementById("langToggle");
+    const langDropdown = document.getElementById("langDropdown");
+    const langOptions = document.querySelectorAll(".lang-option");
+    
+    langToggle.addEventListener("click", function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      langDropdown.classList.toggle("active");
+    });
+    
+    langOptions.forEach(function(option) {
+      option.addEventListener("click", function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const selectedLang = this.getAttribute("data-lang");
+        if (!selectedLang || !translations[selectedLang]) return;
+        
+        const mainContent = document.querySelector('.landing-container');
+        mainContent.style.transition = 'opacity 0.2s ease';
+        mainContent.style.opacity = '0.5';
+        
+        setTimeout(function() {
+          setLanguage(selectedLang);
+          langDropdown.classList.remove("active");
+          
+          setTimeout(function() {
+            mainContent.style.opacity = '1';
+          }, 100);
+        }, 200);
+      });
+    });
+    
+    document.addEventListener("click", function(e) {
+      if (!langDropdown.classList.contains("active")) return;
+      if (!e.target.closest(".lang-selector")) {
+        langDropdown.classList.remove("active");
+      }
+    });
+    
+   
+    document.getElementById('readButton').addEventListener('click', function(e) {
+      e.preventDefault();
+      
+      const transition = document.getElementById('pageTransition');
+      transition.classList.add('active');
+      
+      setTimeout(function() {
+        window.location.href = 'main.html';
+      }, 800);
+    });
+
+  
+    setLanguage(currentLanguage);
+  </script>
+
+</body>
+</html>
